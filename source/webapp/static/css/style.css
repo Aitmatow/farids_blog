@@ -135,3 +135,11 @@ h1 {
 .comment .comment-links {
     margin: 5px 0 0;
 }
+
+p.field select,p.field textarea,p.field input{
+    width: 300px;
+}
+p.field-tags select{
+    width: 300px;
+    height: 150px;
+}
