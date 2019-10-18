@@ -95,8 +95,9 @@ class ArticleCreateView(CreateView):
         new_tags = cur_tags.split(',')
         tags = []
         for i in new_tags:
-            Tag.objects.get_or_create(name=i)
-            tags.append(Tag.objects.get(name=i))
+            if i != "":
+                Tag.objects.get_or_create(name=i)
+                tags.append(Tag.objects.get(name=i))
         return tags
 
 class ArticleUpdateView(UpdateView):
@@ -122,8 +123,9 @@ class ArticleUpdateView(UpdateView):
         new_tags = cur_tags.split(',')
         tags = []
         for i in new_tags:
-            Tag.objects.get_or_create(name=i)
-            tags.append(Tag.objects.get(name=i))
+            if i != "":
+                Tag.objects.get_or_create(name=i)
+                tags.append(Tag.objects.get(name=i))
         return tags
 
 class ArticleDeleteView(DeleteView):
