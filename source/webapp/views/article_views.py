@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView, CreateView,\
     UpdateView, DeleteView
 
 from webapp.forms import ArticleForm, ArticleCommentForm, SimpleSearchForm
-from webapp.models import Article
+from webapp.models import Article, Tag
 from django.core.paginator import Paginator
 
 
@@ -28,8 +28,10 @@ class IndexView(ListView):
             queryset = queryset.filter(
                 Q(title__icontains=self.search_value)
                 | Q(author__icontains=self.search_value)
+                | Q(tags__name__iexact=self.search_value)
             )
         return queryset
+
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
@@ -37,6 +39,7 @@ class IndexView(ListView):
         if self.search_value:
             context['query'] = urlencode({'search': self.search_value})
         return context
+
 
     def get_search_form(self):
         return SimpleSearchForm(data=self.request.GET)
@@ -59,6 +62,7 @@ class ArticleView(DetailView):
         self.paginate_comments_to_context(comments, context)
         return context
 
+
     def paginate_comments_to_context(self, comments, context):
         paginator = Paginator(comments, 3, 0)
         page_number = self.request.GET.get('page', 1)
@@ -78,6 +82,23 @@ class ArticleCreateView(CreateView):
         return reverse('article_view', kwargs={'pk': self.object.pk})
 
 
+    def form_valid(self, form):
+        tags = self.get_tags(form.cleaned_data['tag'])
+        form.cleaned_data.pop('tags')
+        self.object = form.save()
+        self.object.tags.add(*tags)
+        self.object.save()
+        return super().form_valid(form)
+
+
+    def get_tags(self, cur_tags):
+        new_tags = cur_tags.split(',')
+        tags = []
+        for i in new_tags:
+            Tag.objects.get_or_create(name=i)
+            tags.append(Tag.objects.get(name=i))
+        return tags
+
 class ArticleUpdateView(UpdateView):
     model = Article
     template_name = 'article/update.html'
@@ -87,6 +108,23 @@ class ArticleUpdateView(UpdateView):
     def get_success_url(self):
         return reverse('article_view', kwargs={'pk': self.object.pk})
 
+
+    def form_valid(self, form):
+        tags = self.get_tags(form.cleaned_data['tag'])
+        self.object = form.save()
+        self.object.tags.add(*tags)
+        form.cleaned_data.pop('tags')
+        self.object.save()
+        return super().form_valid(form)
+
+
+    def get_tags(self, cur_tags):
+        new_tags = cur_tags.split(',')
+        tags = []
+        for i in new_tags:
+            Tag.objects.get_or_create(name=i)
+            tags.append(Tag.objects.get(name=i))
+        return tags
 
 class ArticleDeleteView(DeleteView):
     model = Article

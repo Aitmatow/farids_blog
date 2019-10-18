@@ -4,10 +4,10 @@ from webapp.models import Article, Comment
 
 
 class ArticleForm(forms.ModelForm):
+    tag = forms.CharField(label='Новый тег', max_length=500, required=False)
     class Meta:
         model = Article
         exclude = ['created_at', 'updated_at']
-
 
 class CommentForm(forms.ModelForm):
     class Meta:
