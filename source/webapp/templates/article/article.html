@@ -17,7 +17,7 @@
             No tags yet
         {% else %}
             {% for tag in article.tags.all %}
-                <a href="{% url 'index' %}?search={{ tag }} " >{{ tag }}</a>
+                <a href="{% url 'index' %}?tag={{ tag }} " >{{ tag }}</a>
             {% endfor %}
         {% endif %}
     </p>
