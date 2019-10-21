@@ -44,9 +44,22 @@ class FullSearchForm(forms.Form):
         in_text = self.cleaned_data.get('in_text')
         in_tags = self.cleaned_data.get('in_tags')
         in_comment_text = self.cleaned_data.get('in_comment_text')
-
+        author = self.cleaned_data.get('author')
+        in_articles = self.cleaned_data.get('in_articles')
+        in_comments = self.cleaned_data.get('in_comments')
+        if not(author or text):
+            raise ValidationError('One of the fields: Text or Author should be filled.',
+                                  code='no_text_search_destination')
         if text:
-            if (in_title or in_text or in_tags or in_comment_text):
-                raise ValidationError('One of the checkboxes : In Title, In text, In Tags, In comment should be checked.',
-                                      code='no_text_search_destination')
+            if not (in_title or in_text or in_tags or in_comment_text):
+                raise ValidationError(
+                    'One of the checkboxes: In Title, In Text, In Tags, In Comment text should be checked.',
+                    code='no_text_search_destination'
+                )
+        if author:
+            if not(in_articles or in_comments):
+                raise ValidationError(
+                    'One of the checkboxes: In Articles, In comments should be checked.',
+                    code='no_text_search_destionation'
+                )
         return self.cleaned_data

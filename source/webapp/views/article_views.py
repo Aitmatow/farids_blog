@@ -149,14 +149,14 @@ class ArticleSearchView(FormView):
     form_class = FullSearchForm
 
     def form_valid(self, form):
-        text = form.cleaned_data['text']
-        query = self.get_text_search_query(form, text)
+        text = form.cleaned_data.get('text')
+        author = form.cleaned_data.get('author')
+        query = self.get_text_search_query(form, text, author)
         context = self.get_context_data(form=form)
         context['articles'] = Article.objects.filter(query).distinct()
         return self.render_to_response(context=context)
 
-
-    def get_text_search_query(self,form,text):
+    def get_text_search_query(self, form, text, author):
         query = Q()
         if text:
             in_title = form.cleaned_data.get('in_title')
@@ -167,8 +167,15 @@ class ArticleSearchView(FormView):
                 query = query | Q(text__icontains=text)
             in_tags = form.cleaned_data.get('in_tags')
             if in_tags:
-                query = query | Q(tags__icontains=text)
+                query = query | Q(tags__name__iexact=text)
             in_comment_text = form.cleaned_data.get('in_comment_text')
             if in_comment_text:
                 query = query | Q(comments__text__icontains=text)
+        if author:
+            in_articles = form.cleaned_data.get('in_articles')
+            if in_articles:
+                query = query | Q(author__iexact=author)
+            in_comments = form.cleaned_data.get('in_comments')
+            if in_comments:
+                query = query | Q(comments__author__iexact=author)
         return query
