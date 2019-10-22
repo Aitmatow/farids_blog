@@ -6,7 +6,7 @@ from django.views.generic import ListView, DetailView, CreateView,\
 
 from webapp.forms import ArticleForm, ArticleCommentForm, SimpleSearchForm, FullSearchForm
 from webapp.models import Article, Tag
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
 class IndexView(ListView):
@@ -14,7 +14,7 @@ class IndexView(ListView):
     context_object_name = 'articles'
     model = Article
     ordering = ['-created_at']
-    paginate_by = 5
+    paginate_by = 1
     paginate_orphans = 1
 
     def get(self, request, *args, **kwargs):
@@ -36,8 +36,6 @@ class IndexView(ListView):
         context['form'] = self.form
         if self.search_value:
             context['query'] = urlencode({'tag': self.search_value})
-
-        print(self.request.GET.get('tag'))
         return context
 
 
@@ -71,6 +69,7 @@ class ArticleView(DetailView):
         context['page_obj'] = page
         context['comments'] = page.object_list
         context['is_paginated'] = page.has_other_pages()
+
 
 
 class ArticleCreateView(CreateView):
@@ -148,6 +147,7 @@ class ArticleSearchView(FormView):
     template_name = 'article/search.html'
     form_class = FullSearchForm
 
+
     def form_valid(self, form):
         text = form.cleaned_data.get('text')
         author = form.cleaned_data.get('author')
@@ -155,6 +155,7 @@ class ArticleSearchView(FormView):
         context = self.get_context_data(form=form)
         context['articles'] = Article.objects.filter(query).distinct()
         return self.render_to_response(context=context)
+
 
     def get_text_search_query(self, form, text, author):
         query = Q()

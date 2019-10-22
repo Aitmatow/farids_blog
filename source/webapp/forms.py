@@ -31,7 +31,7 @@ class FullSearchForm(forms.Form):
     in_title = forms.BooleanField(initial=True, required=False, label='В заголовках')
     in_text = forms.BooleanField(initial=True, required=False, label='В тексте')
     in_tags = forms.BooleanField(initial=True, required=False, label='В тегах')
-    in_comment_text = forms.BooleanField(initial=True, required=False, label='В тексте комментариев')
+    in_comment_text = forms.BooleanField(initial=False, required=False, label='В тексте комментариев')
     author = forms.CharField(max_length=100, required=False, label='Автор')
     in_articles = forms.BooleanField(initial=True, required=False, label='Статей')
     in_comments = forms.BooleanField(initial=False, required=False, label='Комментариев')
@@ -63,3 +63,8 @@ class FullSearchForm(forms.Form):
                     code='no_text_search_destionation'
                 )
         return self.cleaned_data
+
+class ArticleSearchForm(forms.ModelForm):
+    class Meta:
+        model = Article
+        fields = ['title', 'author']
